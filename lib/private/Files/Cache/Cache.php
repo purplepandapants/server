@@ -44,6 +44,7 @@ use OCP\Files\Cache\ICache;
 use OCP\Files\Cache\ICacheEntry;
 use \OCP\Files\IMimeTypeLoader;
 use OCP\Files\Search\ISearchQuery;
+use OCP\Files\Storage\IStorage;
 use OCP\IDBConnection;
 
 /**
@@ -71,6 +72,8 @@ class Cache implements ICache {
 	 */
 	protected $storageId;
 
+	private $storage;
+
 	/**
 	 * @var Storage $storageCache
 	 */
@@ -84,18 +87,17 @@ class Cache implements ICache {
 	 */
 	protected $connection;
 
+	protected $eventDispatcher;
+
 	/** @var QuerySearchHelper */
 	protected $querySearchHelper;
 
 	/**
-	 * @param \OC\Files\Storage\Storage|string $storage
+	 * @param IStorage $storage
 	 */
-	public function __construct($storage) {
-		if ($storage instanceof \OC\Files\Storage\Storage) {
-			$this->storageId = $storage->getId();
-		} else {
-			$this->storageId = $storage;
-		}
+	public function __construct(IStorage $storage) {
+		$this->storageId = $storage->getId();
+		$this->storage = $storage;
 		if (strlen($this->storageId) > 64) {
 			$this->storageId = md5($this->storageId);
 		}
@@ -103,6 +105,7 @@ class Cache implements ICache {
 		$this->storageCache = new Storage($storage);
 		$this->mimetypeLoader = \OC::$server->getMimeTypeLoader();
 		$this->connection = \OC::$server->getDatabaseConnection();
+		$this->eventDispatcher = \OC::$server->getEventDispatcher();
 		$this->querySearchHelper = new QuerySearchHelper($this->mimetypeLoader);
 	}
 
@@ -283,9 +286,11 @@ class Cache implements ICache {
 			}
 
 			if ($builder->execute()) {
-				return (int)$this->connection->lastInsertId('*PREFIX*filecache');
+				$fileId = (int)$this->connection->lastInsertId('*PREFIX*filecache');
+				$this->eventDispatcher->dispatch('OC\Files\Cache\Cache::insert', new CacheInsertEvent($this->storage, $file, $fileId));
+				return $fileId;
 			}
-		} catch(UniqueConstraintViolationException $e) {
+		} catch (UniqueConstraintViolationException $e) {
 			// entry exists already
 		}
 
