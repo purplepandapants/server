@@ -751,6 +751,7 @@ return array(
     'OC\\Files\\AppData\\Factory' => $baseDir . '/lib/private/Files/AppData/Factory.php',
     'OC\\Files\\Cache\\Cache' => $baseDir . '/lib/private/Files/Cache/Cache.php',
     'OC\\Files\\Cache\\CacheEntry' => $baseDir . '/lib/private/Files/Cache/CacheEntry.php',
+    'OC\\Files\\Cache\\CacheInsertEvent' => $baseDir . '/lib/private/Files/Cache/CacheInsertEvent.php',
     'OC\\Files\\Cache\\FailedCache' => $baseDir . '/lib/private/Files/Cache/FailedCache.php',
     'OC\\Files\\Cache\\HomeCache' => $baseDir . '/lib/private/Files/Cache/HomeCache.php',
     'OC\\Files\\Cache\\HomePropagator' => $baseDir . '/lib/private/Files/Cache/HomePropagator.php',
