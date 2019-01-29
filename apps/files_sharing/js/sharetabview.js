@@ -82,6 +82,7 @@
 					var vm = new Resources.Vue({
 						el: '#collaborationResources',
 						render: h => h(Resources.View),
+						store: Resources.Store(),
 						data: {
 							model: this.model.toJSON()
 						},
